@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Genres')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('genres')}"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="page-title mb-0">Genres</h1>
+        <a class="btn btn-primary" th:href="@{/genres/new}">+ New genre</a>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th class="text-center">Novels</th>
+                    <th class="text-center">Avg. rating</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(genres)}">
+                    <td colspan="5" class="text-center text-muted py-4">No genres yet.</td>
+                </tr>
+                <tr th:each="genre : ${genres}">
+                    <td class="fw-semibold" th:text="${genre.name}">Name</td>
+                    <td class="text-muted" th:text="${genre.description}">Description</td>
+                    <td class="text-center">
+                        <a th:href="@{/novels(genreId=${genre.id})}"
+                           th:text="${genre.novelCount}">0</a>
+                    </td>
+                    <td class="text-center">
+                        <span th:replace="~{fragments/layout :: rating(${genre.averageRating})}"></span>
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           th:href="@{/genres/{id}/edit(id=${genre.id})}">Edit</a>
+                        <form class="d-inline"
+                              th:action="@{/genres/{id}(id=${genre.id})}"
+                              th:method="delete"
+                              onsubmit="return confirm('Delete this genre? Novels will be kept.');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${genre.id == null} ? 'New genre' : 'Edit genre')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('genres')}"></nav>
+
+<main class="container" style="max-width: 640px;">
+    <h1 class="page-title mb-4"
+        th:text="${genre.id == null} ? 'New genre' : 'Edit genre'">Genre</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="${genre.id == null} ? @{/genres} : @{/genres/{id}(id=${genre.id})}"
+                  th:method="${genre.id == null} ? 'post' : 'put'"
+                  th:object="${genre}" novalidate>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label required">Name</label>
+                    <input type="text" id="name" class="form-control" th:field="*{name}"
+                           th:errorclass="is-invalid" maxlength="50">
+                    <div class="invalid-feedback" th:errors="*{name}">Error</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" class="form-control" rows="3"
+                              th:field="*{description}" th:errorclass="is-invalid"
+                              maxlength="255"></textarea>
+                    <div class="invalid-feedback" th:errors="*{description}">Error</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a class="btn btn-outline-secondary" th:href="@{/genres}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

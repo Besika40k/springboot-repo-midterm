@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('home')}"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <h1 class="page-title mb-4">Dashboard</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <a class="card stat-card text-decoration-none h-100" th:href="@{/novels}">
+                <div class="card-body">
+                    <div class="stat-value text-dark" th:text="${novelCount}">0</div>
+                    <div class="text-muted">Light novels</div>
+                    <div class="small text-muted"
+                         th:text="|${ongoingCount} ongoing &middot; ${completedCount} completed|">
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a class="card stat-card text-decoration-none h-100" th:href="@{/authors}">
+                <div class="card-body">
+                    <div class="stat-value text-dark" th:text="${authorCount}">0</div>
+                    <div class="text-muted">Authors</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a class="card stat-card text-decoration-none h-100" th:href="@{/genres}">
+                <div class="card-body">
+                    <div class="stat-value text-dark" th:text="${genreCount}">0</div>
+                    <div class="text-muted">Genres</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="stat-value"
+                         th:text="${#numbers.formatInteger(chapterCount, 1, 'COMMA')}">0</div>
+                    <div class="text-muted">Chapters in total</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Top rated</div>
+                <ol class="list-group list-group-flush list-group-numbered">
+                    <li th:if="${#lists.isEmpty(topRated)}" class="list-group-item text-muted">
+                        No rated novels yet.
+                    </li>
+                    <li th:each="novel : ${topRated}"
+                        class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <a class="fw-semibold" th:href="@{/novels/{id}(id=${novel.id})}"
+                               th:text="${novel.title}">Title</a>
+                            <div class="small text-muted" th:text="${novel.author.penName}">Author</div>
+                        </div>
+                        <span th:replace="~{fragments/layout :: rating(${novel.rating})}"></span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Recently added</div>
+                <ul class="list-group list-group-flush">
+                    <li th:if="${#lists.isEmpty(recentNovels)}" class="list-group-item text-muted">
+                        No novels yet.
+                    </li>
+                    <li th:each="novel : ${recentNovels}"
+                        class="list-group-item d-flex align-items-center gap-3">
+                        <div class="cover-sm">
+                            <img th:if="${novel.coverImage}" class="cover rounded"
+                                 th:src="@{/uploads/{f}(f=${novel.coverImage})}" alt="Cover">
+                            <div th:unless="${novel.coverImage}" class="cover-placeholder rounded"
+                                 th:text="${#strings.substring(novel.title, 0, 1)}">N</div>
+                        </div>
+                        <div class="me-auto">
+                            <a class="fw-semibold" th:href="@{/novels/{id}(id=${novel.id})}"
+                               th:text="${novel.title}">Title</a>
+                            <div class="small text-muted" th:text="${novel.author.penName}">Author</div>
+                        </div>
+                        <span th:replace="~{fragments/layout :: statusBadge(${novel.status})}"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Novels per genre</div>
+                <ul class="list-group list-group-flush">
+                    <li th:each="stat : ${genreStats}"
+                        class="list-group-item d-flex justify-content-between">
+                        <a th:href="@{/novels(genreId=${stat.id})}" th:text="${stat.name}">Name</a>
+                        <span class="badge text-bg-secondary rounded-pill"
+                              th:text="${stat.novelCount}">0</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Authors with 2+ novels</div>
+                <ul class="list-group list-group-flush">
+                    <li th:if="${#lists.isEmpty(topAuthors)}" class="list-group-item text-muted">
+                        None yet.
+                    </li>
+                    <li th:each="author : ${topAuthors}"
+                        class="list-group-item d-flex justify-content-between">
+                        <a th:href="@{/authors/{id}(id=${author.id})}"
+                           th:text="${author.penName}">Name</a>
+                        <span class="badge text-bg-primary rounded-pill"
+                              th:text="${#lists.size(author.novels)}">0</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>
