@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${novel.id == null} ? 'New novel' : 'Edit novel')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('novels')}"></nav>
+
+<main class="container" style="max-width: 860px;">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <h1 class="page-title mb-4" th:text="${novel.id == null} ? 'New light novel' : 'Edit light novel'">
+        Light novel
+    </h1>
+
+    <div th:if="${#lists.isEmpty(authors) or #lists.isEmpty(genres)}" class="alert alert-warning">
+        You need at least one <a th:href="@{/authors/new}">author</a> and one
+        <a th:href="@{/genres/new}">genre</a> before adding a novel.
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="${novel.id == null} ? @{/novels} : @{/novels/{id}(id=${novel.id})}"
+                  th:method="${novel.id == null} ? 'post' : 'put'"
+                  th:object="${novel}" enctype="multipart/form-data" novalidate>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="title" class="form-label required">Title</label>
+                        <input type="text" id="title" class="form-control" th:field="*{title}"
+                               th:errorclass="is-invalid" maxlength="200">
+                        <div class="invalid-feedback" th:errors="*{title}">Error</div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <label for="status" class="form-label required">Status</label>
+                        <select id="status" class="form-select" th:field="*{status}"
+                                th:errorclass="is-invalid">
+                            <option value="">Choose...</option>
+                            <option th:each="s : ${statuses}" th:value="${s}"
+                                    th:text="${s.label}">Status</option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{status}">Error</div>
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="chapterCount" class="form-label required">Chapters</label>
+                        <input type="number" id="chapterCount" class="form-control"
+                               th:field="*{chapterCount}" th:errorclass="is-invalid" min="1">
+                        <div class="invalid-feedback" th:errors="*{chapterCount}">Error</div>
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="rating" class="form-label">Rating (0-5)</label>
+                        <input type="number" id="rating" class="form-control" step="0.1"
+                               min="0" max="5" th:field="*{rating}" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{rating}">Error</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="authorId" class="form-label required">Author</label>
+                        <select id="authorId" class="form-select" th:field="*{authorId}"
+                                th:errorclass="is-invalid">
+                            <option value="">Choose an author...</option>
+                            <option th:each="a : ${authors}" th:value="${a.id}"
+                                    th:text="${a.penName}">Author</option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{authorId}">Error</div>
+                    </div>
+
+                    <div class="col-12">
+                        <span class="form-label required d-block">Genres</span>
+                        <div class="border rounded p-2"
+                             th:classappend="${#fields.hasErrors('genreIds')} ? 'border-danger'">
+                            <div class="form-check form-check-inline" th:each="g : ${genres}">
+                                <input type="checkbox" class="form-check-input"
+                                       th:field="*{genreIds}" th:value="${g.id}">
+                                <label class="form-check-label" th:for="${#ids.prev('genreIds')}"
+                                       th:text="${g.name}">Genre</label>
+                            </div>
+                        </div>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('genreIds')}"
+                             th:errors="*{genreIds}">Error</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label">Synopsis</label>
+                        <textarea id="description" class="form-control" rows="4"
+                                  th:field="*{description}" th:errorclass="is-invalid"
+                                  maxlength="2000"></textarea>
+                        <div class="invalid-feedback" th:errors="*{description}">Error</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="coverFile" class="form-label">Cover image</label>
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="cover-sm" th:if="${currentCover}">
+                                <img class="cover rounded" th:src="@{/uploads/{f}(f=${currentCover})}"
+                                     alt="Current cover">
+                            </div>
+                            <div class="flex-grow-1">
+                                <input type="file" id="coverFile" name="coverFile" class="form-control"
+                                       th:classappend="${coverError} ? 'is-invalid'"
+                                       accept="image/png, image/jpeg, image/gif, image/webp">
+                                <div class="invalid-feedback" th:text="${coverError}">Error</div>
+                                <div class="form-text">
+                                    Optional. JPG, PNG, GIF or WEBP, up to 5 MB.
+                                    <span th:if="${currentCover}">Choosing a file replaces the current cover.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a class="btn btn-outline-secondary"
+                       th:href="${novel.id == null} ? @{/novels} : @{/novels/{id}(id=${novel.id})}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

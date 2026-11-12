@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${novel.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('novels')}"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/novels}">Light novels</a></li>
+            <li class="breadcrumb-item active" th:text="${novel.title}">Title</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="cover-lg mx-auto">
+                <img th:if="${novel.coverImage}" class="cover rounded shadow-sm"
+                     th:src="@{/uploads/{f}(f=${novel.coverImage})}" alt="Novel cover">
+                <div th:unless="${novel.coverImage}" class="cover-placeholder rounded shadow-sm"
+                     th:text="${novel.title}">Title</div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h2 class="h6">Cover image</h2>
+                        <form th:action="@{/novels/{id}/cover(id=${novel.id})}" method="post"
+                              enctype="multipart/form-data">
+                            <input type="file" class="form-control form-control-sm mb-2" name="file"
+                                   accept="image/png, image/jpeg, image/gif, image/webp" required>
+                            <button type="submit" class="btn btn-sm btn-primary w-100"
+                                    th:text="${novel.coverImage} ? 'Replace cover' : 'Upload cover'">
+                                Upload cover
+                            </button>
+                        </form>
+                        <form th:if="${novel.coverImage}" class="mt-2"
+                              th:action="@{/novels/{id}/cover(id=${novel.id})}" th:method="delete">
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                Remove cover
+                            </button>
+                        </form>
+                        <div class="form-text">JPG, PNG, GIF or WEBP, up to 5 MB.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="d-flex flex-wrap justify-content-between gap-2">
+                <h1 class="page-title h2" th:text="${novel.title}">Title</h1>
+                <div class="d-flex gap-2 align-items-start">
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/novels/{id}/edit(id=${novel.id})}">Edit</a>
+                    <form th:action="@{/novels/{id}(id=${novel.id})}" th:method="delete"
+                          onsubmit="return confirm('Delete this novel?');">
+                        <button type="submit" class="btn btn-outline-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+            <p class="lead">
+                by <a th:href="@{/authors/{id}(id=${novel.author.id})}"
+                      th:text="${novel.author.penName}">Author</a>
+                <span class="text-muted" th:if="${novel.author.originalName}"
+                      th:text="|(${novel.author.originalName})|"></span>
+            </p>
+
+            <div class="mb-3">
+                <span th:replace="~{fragments/layout :: statusBadge(${novel.status})}"></span>
+                <a th:each="g : ${novel.genres}" class="badge text-bg-secondary text-decoration-none ms-1"
+                   th:href="@{/novels(genreId=${g.id})}" th:text="${g.name}">Genre</a>
+            </div>
+
+            <dl class="row">
+                <dt class="col-sm-3">Rating</dt>
+                <dd class="col-sm-9">
+                    <span th:replace="~{fragments/layout :: rating(${novel.rating})}"></span>
+                </dd>
+                <dt class="col-sm-3">Chapters</dt>
+                <dd class="col-sm-9" th:text="${novel.chapterCount}">100</dd>
+                <dt class="col-sm-3">Added</dt>
+                <dd class="col-sm-9" th:text="${#temporals.format(novel.createdAt, 'dd MMM yyyy, HH:mm')}">
+                    date
+                </dd>
+                <dt class="col-sm-3">Cover file</dt>
+                <dd class="col-sm-9"><code th:text="${novel.coverImage} ?: 'none'">file.png</code></dd>
+            </dl>
+
+            <h2 class="h5">Synopsis</h2>
+            <p th:text="${novel.description} ?: 'No synopsis.'" style="white-space: pre-line;">
+                Synopsis
+            </p>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

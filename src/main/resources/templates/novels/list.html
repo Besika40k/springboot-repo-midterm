@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Light novels')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('novels')}"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="page-title mb-0">Light novels</h1>
+        <a class="btn btn-primary" th:href="@{/novels/new}">+ New novel</a>
+    </div>
+
+    <form class="card card-body mb-4" th:action="@{/novels}" method="get">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-6 col-lg-3">
+                <label for="keyword" class="form-label small text-muted">Title</label>
+                <input type="search" id="keyword" class="form-control" name="keyword"
+                       th:value="${keyword}" placeholder="Search...">
+            </div>
+            <div class="col-sm-6 col-md-6 col-lg-3">
+                <label for="authorId" class="form-label small text-muted">Author</label>
+                <select id="authorId" class="form-select" name="authorId">
+                    <option value="">All authors</option>
+                    <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.penName}"
+                            th:selected="${a.id == authorId}">Author</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-md-6 col-lg-3">
+                <label for="genreId" class="form-label small text-muted">Genre</label>
+                <select id="genreId" class="form-select" name="genreId">
+                    <option value="">All genres</option>
+                    <option th:each="g : ${genres}" th:value="${g.id}" th:text="${g.name}"
+                            th:selected="${g.id == genreId}">Genre</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-md-6 col-lg-3">
+                <label for="status" class="form-label small text-muted">Status</label>
+                <select id="status" class="form-select" name="status">
+                    <option value="">Any status</option>
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}"
+                            th:selected="${s == status}">Status</option>
+                </select>
+            </div>
+            <div class="col-sm-4 col-lg-3">
+                <label for="sort" class="form-label small text-muted">Sort by</label>
+                <select id="sort" class="form-select" name="sort">
+                    <option value="rating" th:selected="${sort == 'rating'}">Rating</option>
+                    <option value="title" th:selected="${sort == 'title'}">Title</option>
+                    <option value="chapterCount" th:selected="${sort == 'chapterCount'}">Chapters</option>
+                    <option value="createdAt" th:selected="${sort == 'createdAt'}">Date added</option>
+                </select>
+            </div>
+            <div class="col-sm-4 col-lg-2">
+                <label for="dir" class="form-label small text-muted">Order</label>
+                <select id="dir" class="form-select" name="dir">
+                    <option value="desc" th:selected="${dir == 'desc'}">Descending</option>
+                    <option value="asc" th:selected="${dir == 'asc'}">Ascending</option>
+                </select>
+            </div>
+            <div class="col-sm-4 col-lg-2">
+                <label for="size" class="form-label small text-muted">Per page</label>
+                <select id="size" class="form-select" name="size">
+                    <option th:each="s : ${ {4, 8, 12, 24} }" th:value="${s}" th:text="${s}"
+                            th:selected="${s == size}">8</option>
+                </select>
+            </div>
+            <div class="col-lg-5 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Apply</button>
+                <a class="btn btn-outline-secondary" th:href="@{/novels}">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    <p th:if="${novels.empty}" class="text-center text-muted py-5">No novels match your filters.</p>
+
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
+        <div class="col" th:each="novel : ${novels.content}">
+            <a class="card novel-card h-100 text-decoration-none text-dark"
+               th:href="@{/novels/{id}(id=${novel.id})}">
+                <img th:if="${novel.coverImage}" class="cover card-img-top"
+                     th:src="@{/uploads/{f}(f=${novel.coverImage})}" alt="Cover">
+                <div th:unless="${novel.coverImage}" class="cover-placeholder card-img-top"
+                     th:text="${novel.title}">Title</div>
+                <div class="card-body">
+                    <h2 class="h6 mb-1" th:text="${novel.title}">Title</h2>
+                    <div class="small text-muted mb-2" th:text="${novel.author.penName}">Author</div>
+                    <div class="d-flex justify-content-between align-items-center small mb-2">
+                        <span th:replace="~{fragments/layout :: rating(${novel.rating})}"></span>
+                        <span class="text-muted" th:text="|${novel.chapterCount} ch.|">100 ch.</span>
+                    </div>
+                    <span th:replace="~{fragments/layout :: statusBadge(${novel.status})}"></span>
+                    <span th:each="g : ${novel.genres}"
+                          class="badge text-bg-light border me-1" th:text="${g.name}">Genre</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-2"
+         th:if="${novels.totalElements > 0}">
+        <span class="text-muted small"
+              th:text="|Showing ${novels.number * novels.size + 1}-${novels.number * novels.size + novels.numberOfElements} of ${novels.totalElements} novels|">
+            Showing 1-8 of 20
+        </span>
+        <nav th:if="${novels.totalPages > 1}" aria-label="Novel pages">
+            <ul class="pagination mb-0">
+                <li class="page-item" th:classappend="${novels.first} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/novels(keyword=${keyword}, authorId=${authorId}, genreId=${genreId},
+                                status=${status}, page=${novels.number - 1}, size=${size},
+                                sort=${sort}, dir=${dir})}">Previous</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, novels.totalPages - 1)}"
+                    th:classappend="${i == novels.number} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/novels(keyword=${keyword}, authorId=${authorId}, genreId=${genreId},
+                                status=${status}, page=${i}, size=${size}, sort=${sort}, dir=${dir})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${novels.last} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/novels(keyword=${keyword}, authorId=${authorId}, genreId=${genreId},
+                                status=${status}, page=${novels.number + 1}, size=${size},
+                                sort=${sort}, dir=${dir})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>
