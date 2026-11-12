@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Not found')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('')}"></nav>
+
+<main class="container text-center py-5">
+    <h1 class="display-4 fw-bold">404</h1>
+    <p class="lead" th:text="${message} ?: 'The page you are looking for does not exist.'">
+        Not found
+    </p>
+    <a class="btn btn-primary" th:href="@{/}">Back to the dashboard</a>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>
