@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${author.id == null} ? 'New author' : 'Edit author')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('authors')}"></nav>
+
+<main class="container" style="max-width: 720px;">
+    <h1 class="page-title mb-4"
+        th:text="${author.id == null} ? 'New author' : 'Edit author'">Author</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="${author.id == null} ? @{/authors} : @{/authors/{id}(id=${author.id})}"
+                  th:method="${author.id == null} ? 'post' : 'put'"
+                  th:object="${author}" novalidate>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label for="penName" class="form-label required">Pen name</label>
+                        <input type="text" id="penName" class="form-control"
+                               th:field="*{penName}" th:errorclass="is-invalid" maxlength="100">
+                        <div class="invalid-feedback" th:errors="*{penName}">Error</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="originalName" class="form-label">Original name</label>
+                        <input type="text" id="originalName" class="form-control"
+                               th:field="*{originalName}" th:errorclass="is-invalid"
+                               maxlength="100" placeholder="e.g. 爱潜水的乌贼">
+                        <div class="invalid-feedback" th:errors="*{originalName}">Error</div>
+                    </div>
+                    <div class="col-12">
+                        <label for="email" class="form-label">Contact email</label>
+                        <input type="email" id="email" class="form-control"
+                               th:field="*{email}" th:errorclass="is-invalid" maxlength="100">
+                        <div class="invalid-feedback" th:errors="*{email}">Error</div>
+                    </div>
+                    <div class="col-12">
+                        <label for="biography" class="form-label">Biography</label>
+                        <textarea id="biography" class="form-control" rows="4"
+                                  th:field="*{biography}" th:errorclass="is-invalid"
+                                  maxlength="1000"></textarea>
+                        <div class="invalid-feedback" th:errors="*{biography}">Error</div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a class="btn btn-outline-secondary"
+                       th:href="${author.id == null} ? @{/authors} : @{/authors/{id}(id=${author.id})}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

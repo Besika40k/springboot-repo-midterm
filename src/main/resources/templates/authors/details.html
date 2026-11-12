@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${author.penName})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('authors')}"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/authors}">Authors</a></li>
+            <li class="breadcrumb-item active" th:text="${author.penName}">Name</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between gap-3">
+                <div>
+                    <h1 class="page-title h2 mb-1" th:text="${author.penName}">Name</h1>
+                    <div class="text-muted">
+                        <span th:if="${author.originalName}" th:text="${author.originalName}">原名</span>
+                        <span th:if="${author.originalName != null and author.email != null}"> &middot; </span>
+                        <a th:if="${author.email}" th:href="|mailto:${author.email}|"
+                           th:text="${author.email}">email</a>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 align-items-start">
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/authors/{id}/edit(id=${author.id})}">Edit</a>
+                    <form th:action="@{/authors/{id}(id=${author.id})}" th:method="delete"
+                          th:attr="onsubmit=|return confirm('Delete this author and their ${#lists.size(novels)} novel(s)?');|">
+                        <button type="submit" class="btn btn-outline-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+            <p class="mt-3 mb-0" th:if="${author.biography}" th:text="${author.biography}">Bio</p>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0" th:text="|Novels (${#lists.size(novels)})|">Novels</h2>
+        <a class="btn btn-primary btn-sm" th:href="@{/novels/new(authorId=${author.id})}">+ Add novel</a>
+    </div>
+
+    <p th:if="${#lists.isEmpty(novels)}" class="text-muted">This author has no novels yet.</p>
+
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+        <div class="col" th:each="novel : ${novels}">
+            <a class="card novel-card h-100 text-decoration-none text-dark"
+               th:href="@{/novels/{id}(id=${novel.id})}">
+                <img th:if="${novel.coverImage}" class="cover card-img-top"
+                     th:src="@{/uploads/{f}(f=${novel.coverImage})}" alt="Cover">
+                <div th:unless="${novel.coverImage}" class="cover-placeholder card-img-top"
+                     th:text="${novel.title}">Title</div>
+                <div class="card-body p-2">
+                    <div class="small fw-semibold" th:text="${novel.title}">Title</div>
+                    <div class="small d-flex justify-content-between">
+                        <span th:replace="~{fragments/layout :: rating(${novel.rating})}"></span>
+                        <span class="text-muted" th:text="${novel.status.label}">Ongoing</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>
